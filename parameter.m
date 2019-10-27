@@ -25,13 +25,14 @@ sample_freq = 44100;
 carrier_freq = 1000;
 preamble_high_freq = 4000;
 preamble_low_freq = 2000;
-start_preamble_num = 3;
-end_preamble_num = 3;
-preamble_am = 4e-3;
+start_preamble_num = 2;
+end_preamble_num = 2;
+am = 100;
 
 t = (0:1/sample_freq:(symbol_len-1)/sample_freq);
 smb_start = chirp(t,preamble_low_freq,t(end),preamble_high_freq);
 smb_end = chirp(t,preamble_high_freq,t(end),preamble_low_freq);
 
 data_input = randsrc(1, data_num, 0:M-1);
-pilot_input = randsrc(1, pilot_num, 0:M-1);
+% pilot_input = randsrc(1, pilot_num, 0:M-1);
+pilot_input = zeros(1, pilot_num);

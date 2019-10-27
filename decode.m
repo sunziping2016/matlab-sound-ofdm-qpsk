@@ -5,7 +5,7 @@ start_end_threshold = 100;
 %start_end_threshold = 1;
 
 %% 读取信号
-sound = audioread('32.wav')';
+sound = audioread('33.wav')';
 sound = sound(1,:);
 
 %% 寻找preamble
@@ -37,6 +37,7 @@ for i = 1:slide_num
     [end_cor_max, index] = max(end_cor);
     end_lag = start_lags(index);
     %fprintf("start lag: %d end lag: %d\n", start_lag, end_lag);
+    skip_buffer = false;
     if start_cor_max > start_end_threshold && 0 <= start_lag && start_lag <= symbol_len
         starts = [starts, start_lag];
         fprintf("start_cor_max: %d index: %d\n", start_cor_max, start_lag);
@@ -44,24 +45,25 @@ for i = 1:slide_num
             fprintf("start: %f\n", (i-1)*symbol_len+mean(starts)+1);
             signal_buffer = sig_rec_window(round(mean(starts))+1:symbol_len);
             started = 1;
+            skip_buffer = true;
         end
     else
-        if end_cor_max > start_end_threshold && 0 < end_lag && end_lag <= symbol_len
-            ends = [ends, end_lag];
-            fprintf("end_cor_max: %d index: %d\n", end_cor_max, end_lag);
-            if length(ends) == end_preamble_num
-                fprintf("end: %f\n", (i-1)*symbol_len+mean(ends)+1);
-                signal_buffer = [signal_buffer, sig_rec_window(1:round(mean(ends)))];
-                signal_buffer = signal_buffer(symbol_len+1:end-(end_preamble_num-1)*symbol_len);
-                started = 0;
-            end
-        else
-            starts = [];
-            ends = [];
+        starts = [];
+    end
+    if end_cor_max > start_end_threshold && 0 < end_lag && end_lag <= symbol_len
+        ends = [ends, end_lag];
+        fprintf("end_cor_max: %d index: %d\n", end_cor_max, end_lag);
+        if length(ends) == end_preamble_num
+            fprintf("end: %f\n", (i-1)*symbol_len+mean(ends)+1);
+            signal_buffer = [signal_buffer, sig_rec_window(1:round(mean(ends)))];
+            signal_buffer = signal_buffer(symbol_len+1:end-(end_preamble_num-1)*symbol_len);
+            started = 0;
         end
-        if started == 1
-            signal_buffer = [signal_buffer, sig_rec_window(1:symbol_len)];
-        end
+    else
+        ends = [];
+    end
+    if started == 1 && not(skip_buffer);
+        signal_buffer = [signal_buffer, sig_rec_window(1:symbol_len)];
     end
     fprintf("signal buffer size: %d\n", length(signal_buffer));
     if plot_start_end
@@ -129,7 +131,7 @@ scatterplot(recvd_serial_data);title('MODULATED RECEIVED DATA');
 qpsk_modulated_pilot = pskmod(pilot_input, M);
 delta_frequency = qpsk_modulated_pilot ./ recvd_serial_pilot;
 recvd_serial_data_corrected = recvd_serial_data .* mean(delta_frequency);
-% scatterplot(delta_frequency);title('MODULATED RECEIVED PILOT DELTA');
+scatterplot(delta_frequency);title('MODULATED RECEIVED PILOT DELTA');
 
 qpsk_demodulated_data = pskdemod(recvd_serial_data_corrected,M);
 
