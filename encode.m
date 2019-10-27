@@ -5,14 +5,15 @@ run('parameter');
 %% 生成随机数据
 figure(1);
 stem(data_input); grid on; xlabel('Data Points'); ylabel('Amplitude');
-title('Transmitted Data "O"');
+title('原始数据');
 
 writematrix(data_input, 'data.txt');
 
 %% 使用QPSK调制
-qpsk_modulated_data = pskmod(data_input, M);
-qpsk_modulated_pilot = pskmod(pilot_input, M);
-% scatterplot(qpsk_modulated_data);title('MODULATED TRANSMITTED DATA');
+qpsk_modulated_data = qpsk_modulate(data_input);
+qpsk_modulated_pilot = qpsk_modulate(pilot_input);
+figure(2);
+scatter(real(qpsk_modulated_data), imag(qpsk_modulated_data));title('调制后的数据');
 
 %% 对每个块做IFFT
 data_matrix = reshape(qpsk_modulated_data, data_subcarrier_num, symbol_num);
@@ -41,13 +42,6 @@ ofdm_signal = reshape(ifft_data, 1, real_symbol_len * symbol_num);
 %% 调制信号
 t = 0:1/sample_freq:(length(ofdm_signal)-1)/sample_freq;
 tx = real(ofdm_signal.*exp(1j*2*pi*carrier_freq*t));
-figure(2);
-subplot(3,1,1);
-plot(real(ofdm_signal));
-subplot(3,1,2);
-plot(imag(ofdm_signal));
-subplot(3,1,3);
-plot(tx);
 
 %% 加入
 real_tx = [zeros(1,space_factor*symbol_len), ...
@@ -56,6 +50,17 @@ real_tx = [zeros(1,space_factor*symbol_len), ...
            repmat(smb_end,1,end_preamble_num), ...
            zeros(1,space_factor*symbol_len)];
 figure(3);
+subplot(4,1,1);
+plot(real(ofdm_signal));
+title('基带信号实部')
+subplot(4,1,2);
+plot(imag(ofdm_signal));
+title('基带信号虚部')
+subplot(4,1,3);
+plot(tx);
+title('频带信号')
+subplot(4,1,4);
 plot(real_tx);
+title('处理后的频带信号');
 
 audiowrite('send.wav', real_tx, sample_freq, 'BitsPerSample', 16);

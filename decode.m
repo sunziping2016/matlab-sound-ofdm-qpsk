@@ -5,17 +5,19 @@ start_end_threshold = 100;
 %start_end_threshold = 1;
 
 %% 读取信号
-sound = audioread('33.wav')';
+sound = audioread('send.wav')';
 sound = sound(1,:);
 
 %% 寻找preamble
 figure(4);
 [start_cor,start_lags] = xcorr(sound, smb_start);
 subplot(2,1,1);
+title('起始信号位置');
 plot(start_lags, start_cor);
 [end_cor,end_lags] = xcorr(sound, smb_end);
 subplot(2,1,2);
 plot(end_lags, end_cor);
+title('终止信号位置');
 
 plot_start_end = false;
 if plot_start_end
@@ -83,6 +85,7 @@ end
 
 figure(6);
 plot(signal_buffer);
+title('收到的信号');
 
 %% 调整信号长度 
 real_signal_len = length(signal_buffer);
@@ -108,8 +111,10 @@ imag_recvd_signal = rx.*imag(exp(-1j*2*pi*carrier_freq*t));
 figure(7);
 subplot(2,1,1);
 plot(real_recvd_signal);
+title('恢复的基带信号实部');
 subplot(2,1,2)
 plot(imag_recvd_signal);
+title('恢复的基带信号虚部');
 recvd_signal = real_recvd_signal + 1j * imag_recvd_signal;
 
 %% 解析信号
@@ -124,17 +129,20 @@ for i=1:symbol_num
 end
 
 data_num = data_subcarrier_num*symbol_num;
-pilot_num = pilot_subcarrier_num*symbol_num;
+pilot_num = pilot_subcarrier_num*symbol_num;title('恢复的基带信号实部');
+
 recvd_serial_data = reshape(fft_data(data_subcarrier_indices, :), 1,data_num);
 recvd_serial_pilot = reshape(fft_data(pilot_subcarrier_indices, :), 1,pilot_num);
-scatterplot(recvd_serial_data);title('MODULATED RECEIVED DATA');
-qpsk_modulated_pilot = pskmod(pilot_input, M);
+figure(8);
+scatter(real(recvd_serial_data), imag(recvd_serial_data));title('收到的数据星座图');
+qpsk_modulated_pilot = qpsk_modulate(pilot_input);
 delta_frequency = qpsk_modulated_pilot ./ recvd_serial_pilot;
 recvd_serial_data_corrected = recvd_serial_data .* mean(delta_frequency);
-scatterplot(delta_frequency);title('MODULATED RECEIVED PILOT DELTA');
+figure(9);
+scatter(real(delta_frequency), imag(delta_frequency));title('pilot星座图');
 
-qpsk_demodulated_data = pskdemod(recvd_serial_data_corrected,M);
+qpsk_demodulated_data = qpsk_demodulate(recvd_serial_data_corrected);
 
-figure(8)
+figure(10);
 stem(qpsk_demodulated_data,'rx');
-grid on;xlabel('Data Points');ylabel('Amplitude');title('Received Data "X"')    
+grid on;xlabel('Data Points');ylabel('Amplitude');title('收到的数据')    

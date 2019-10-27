@@ -33,6 +33,6 @@ t = (0:1/sample_freq:(symbol_len-1)/sample_freq);
 smb_start = chirp(t,preamble_low_freq,t(end),preamble_high_freq);
 smb_end = chirp(t,preamble_high_freq,t(end),preamble_low_freq);
 
-data_input = randsrc(1, data_num, 0:M-1);
-% pilot_input = randsrc(1, pilot_num, 0:M-1);
+data_input = randi([0, M-1], 1, data_num);
+% pilot_input = randi([0, M-1], 1, pilot_num);
 pilot_input = zeros(1, pilot_num);
