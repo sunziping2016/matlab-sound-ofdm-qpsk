@@ -19,7 +19,7 @@ subplot(2,1,2);
 plot(end_lags, end_cor);
 title('终止信号位置');
 
-plot_start_end = false;
+plot_start_end = true;
 if plot_start_end
     figure(5)
     axes = [];
@@ -129,7 +129,7 @@ for i=1:symbol_num
 end
 
 data_num = data_subcarrier_num*symbol_num;
-pilot_num = pilot_subcarrier_num*symbol_num;title('恢复的基带信号实部');
+pilot_num = pilot_subcarrier_num*symbol_num;
 
 recvd_serial_data = reshape(fft_data(data_subcarrier_indices, :), 1,data_num);
 recvd_serial_pilot = reshape(fft_data(pilot_subcarrier_indices, :), 1,pilot_num);

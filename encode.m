@@ -23,9 +23,6 @@ full_matrix = zeros(subcarrier_num, symbol_num);
 full_matrix(data_subcarrier_indices, :) = data_matrix;
 full_matrix(pilot_subcarrier_indices, :) = pilot_matrix;
 
-cyclic_prefix_start = symbol_len-cyclic_prefix_len;
-cyclic_prefix_end = symbol_len;
-
 for i=1:symbol_num
     ifft_full_matrix(:,i) = ifft((full_matrix(:,i)),symbol_len);
     %   Compute and append Cyclic Prefix
@@ -44,11 +41,11 @@ t = 0:1/sample_freq:(length(ofdm_signal)-1)/sample_freq;
 tx = real(ofdm_signal.*exp(1j*2*pi*carrier_freq*t));
 
 %% 加入
-real_tx = [zeros(1,space_factor*symbol_len), ...
+real_tx = [zeros(1,space_factor*real_symbol_len), ...
            repmat(smb_start,1,start_preamble_num), ...
            am.*tx, ...
            repmat(smb_end,1,end_preamble_num), ...
-           zeros(1,space_factor*symbol_len)];
+           zeros(1,space_factor*real_symbol_len)];
 figure(3);
 subplot(4,1,1);
 plot(real(ofdm_signal));
