@@ -2,12 +2,12 @@
 rng(50)
 
 M = 4;
-symbol_num = 1;
+symbol_num = 2;
 subcarrier_num = 10;
 pilot_subcarrier_num = 2;
 symbol_len = 2048;
-cyclic_prefix_factor = 0.1;
-space_factor = 0;
+cyclic_prefix_factor = 0;
+space_factor = 0.5;
 
 data_subcarrier_num = subcarrier_num - pilot_subcarrier_num;
 pilot_subcarrier_indices = round((1:pilot_subcarrier_num) .* (subcarrier_num / (pilot_subcarrier_num + 1)));
@@ -25,8 +25,8 @@ sample_freq = 44100;
 carrier_freq = 16000;
 preamble_high_freq = 16000;
 preamble_low_freq = 8000;
-start_preamble_num = 6;
-end_preamble_num = 6;
+start_preamble_num = 2;
+end_preamble_num = 2;
 am = 200;
 
 t = (0:1/sample_freq:(real_symbol_len-1)/sample_freq);

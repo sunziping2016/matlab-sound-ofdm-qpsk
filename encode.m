@@ -30,7 +30,11 @@ for i=1:symbol_num
        actual_cyclic_prefix(j,i) = ifft_full_matrix(j+cyclic_prefix_start,i);
     end
     %   Append the CP to the existing block to create the actual OFDM block
-    ifft_data(:,i) = vertcat(actual_cyclic_prefix(:,i),ifft_full_matrix(:,i));
+    if cyclic_prefix_len > 0
+        ifft_data(:,i) = vertcat(actual_cyclic_prefix(:,i),ifft_full_matrix(:,i));
+    else
+        ifft_data(:,i) = ifft_full_matrix(:,i);
+    end
 end
 
 %% 转成序列信号
@@ -41,11 +45,11 @@ t = 0:1/sample_freq:(length(ofdm_signal)-1)/sample_freq;
 tx = real(ofdm_signal.*exp(1j*2*pi*carrier_freq*t));
 
 %% 加入
-real_tx = [zeros(1,space_factor*real_symbol_len), ...
+real_tx = [zeros(1,round(space_factor*real_symbol_len)), ...
            repmat(smb_start,1,start_preamble_num), ...
            am.*tx, ...
            repmat(smb_end,1,end_preamble_num), ...
-           zeros(1,space_factor*real_symbol_len)];
+           zeros(1,round(space_factor*real_symbol_len))];
 figure(3);
 subplot(4,1,1);
 plot(real(ofdm_signal));
